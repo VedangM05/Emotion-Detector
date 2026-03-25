@@ -2,7 +2,7 @@
 Server script for the Emotion Detection application.
 Runs a Flask server providing emotion analysis via an API.
 """
-from flask import Flask, request, jsonify
+from flask import Flask, request
 from EmotionDetection import emotion_detector
 
 app = Flask(__name__)
@@ -18,9 +18,12 @@ def emotion_detect_route():
     if not text_to_analyze or text_to_analyze.strip() == "":
         return "Invalid text! Please try again!", 400
 
-    result = emotion_detector(text_to_analyze)
+    try:
+        result = emotion_detector(text_to_analyze)
+    except Exception: # pylint: disable=broad-except
+        return "Internal Server Error! Please try again later.", 500
 
-    if result['dominant_emotion'] is None:
+    if result is None or result['dominant_emotion'] is None:
         return "Invalid text! Please try again!", 400
 
     response_str = (
